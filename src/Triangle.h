@@ -17,6 +17,7 @@ class Triangle {
 private:
     Vec3 m_c[3] , m_normal;
     float area;
+    int indiceInMesh;
 public:
     Triangle() {}
     Triangle( Vec3 const & c0 , Vec3 const & c1 , Vec3 const & c2 ) {
@@ -32,6 +33,10 @@ public:
 
     Vec3 centroid() const {
         return (m_c[0] + m_c[1] + m_c[2]) / 3.0f;
+    }
+
+    void setIndice(int ind){
+        indiceInMesh=ind;
     }
 
 
@@ -115,6 +120,7 @@ public:
             result.w1 = w1;
             result.w2 = w2;
             result.normal = m_normal;
+            result.tIndex=indiceInMesh;
         }
 
         return result;

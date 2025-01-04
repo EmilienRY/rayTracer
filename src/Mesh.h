@@ -111,25 +111,26 @@ public:
     void scaleUnit ();
 
     void buildKDTree() {
-        auto explicitTriangles = getExplicitTriangles();
-        kdTree = new KDTree(explicitTriangles);
+        std::vector<Triangle> listeTriangles = getAllTriangles();
+        kdTree = new KDTree(listeTriangles);
     }
 
-    std::vector<Triangle> getExplicitTriangles() const {
-        std::vector<Triangle> explicitTriangles;
-        explicitTriangles.reserve(triangles.size());
+    std::vector<Triangle> getAllTriangles() const {
+        std::vector<Triangle> listeTriangles;
+        listeTriangles.reserve(triangles.size());
 
-    for (const auto& tri : triangles) {
-        Vec3 v0 = vertices[tri[0]].position;
-        Vec3 v1 = vertices[tri[1]].position;
-        Vec3 v2 = vertices[tri[2]].position;
-        
-        Triangle triangle(v0, v1, v2);
+        for (int i=0;i<triangles.size();i++) {
+            Vec3 v0 = vertices[triangles[i][0]].position;
+            Vec3 v1 = vertices[triangles[i][1]].position;
+            Vec3 v2 = vertices[triangles[i][2]].position;
+            
+            Triangle triangle(v0, v1, v2);
+            triangle.setIndice(i);
 
-        explicitTriangles.push_back(triangle);
-    }
+            listeTriangles.push_back(triangle);
+        }
 
-        return explicitTriangles;
+        return listeTriangles;
     }
 
 
@@ -157,10 +158,6 @@ public:
         for( unsigned int v = 0 ; v < vertices.size() ; ++v ) {
             vertices[v].position = transform*vertices[v].position;
         }
-
-        //        recomputeNormals();
-        //        build_positions_array();
-        //        build_normals_array();
     }
 
     void scale( Vec3 const & scale ){
@@ -230,47 +227,57 @@ public:
     // Vous constaterez des problemes de précision
     // solution : ajouter un facteur d'échelle lors de la création du Triangle : float triangleScaling = 1.000001;
 
-        // RayTriangleIntersection intersect(Ray const& ray) const {
-        //     RayTriangleIntersection hitInfo;
-        //     if (kdTree && kdTree->intersect(ray, hitInfo)) {
-        //         return hitInfo;
-        //     }
-        //     return RayTriangleIntersection(); 
-        // }
-
-
         RayTriangleIntersection intersect(Ray const& ray) const {
-            RayTriangleIntersection closestIntersection;
-            closestIntersection.t = FLT_MAX;
-            closestIntersection.intersectionExists = false;
-            
-            float triangleScaling = 1.000001f;
+            RayTriangleIntersection hitInfo;
+            if (kdTree && kdTree->intersect(ray, hitInfo)) {
 
-            for (unsigned int i = 0; i < triangles.size(); i++) {
-                Vec3 v0 = vertices[triangles[i][0]].position;
-                Vec3 v1 = vertices[triangles[i][1]].position;
-                Vec3 v2 = vertices[triangles[i][2]].position;
 
-                Vec3 center = (v0 + v1 + v2) / 3.0f;
-                v0 = center + (v0 - center) * triangleScaling;
-                v1 = center + (v1 - center) * triangleScaling;
-                v2 = center + (v2 - center) * triangleScaling;
-
-                Triangle triangle(v0, v1, v2);
-
-                RayTriangleIntersection intersection = triangle.getIntersection(ray);
-                
-                if (intersection.intersectionExists && intersection.t < closestIntersection.t) {
-                    closestIntersection = intersection;
-                    closestIntersection.tIndex = i;
-                    closestIntersection.normal = vertices[triangles[i][0]].normal * intersection.w0 +
-                                            vertices[triangles[i][1]].normal * intersection.w1 +
-                                            vertices[triangles[i][2]].normal * intersection.w2;
+                if (hitInfo.intersectionExists) {
+                    hitInfo.normal = vertices[triangles[hitInfo.tIndex][0]].normal * hitInfo.w0 +
+                                            vertices[triangles[hitInfo.tIndex][1]].normal * hitInfo.w1 +
+                                            vertices[triangles[hitInfo.tIndex][2]].normal * hitInfo.w2;
                 }
-            }
 
-            return closestIntersection;
+
+
+                return hitInfo;
+            }
+            return RayTriangleIntersection(); 
         }
+
+
+        // RayTriangleIntersection intersect(Ray const& ray) const {
+        //     RayTriangleIntersection closestIntersection;
+        //     closestIntersection.t = FLT_MAX;
+        //     closestIntersection.intersectionExists = false;
+            
+        //     float triangleScaling = 1.000001f;
+
+        //     for (unsigned int i = 0; i < triangles.size(); i++) {
+        //         Vec3 v0 = vertices[triangles[i][0]].position;
+        //         Vec3 v1 = vertices[triangles[i][1]].position;
+        //         Vec3 v2 = vertices[triangles[i][2]].position;
+
+        //         Vec3 center = (v0 + v1 + v2) / 3.0f;
+        //         v0 = center + (v0 - center) * triangleScaling;
+        //         v1 = center + (v1 - center) * triangleScaling;
+        //         v2 = center + (v2 - center) * triangleScaling;
+
+        //         Triangle triangle(v0, v1, v2);
+
+        //         RayTriangleIntersection intersection = triangle.getIntersection(ray);
+                
+        //         if (intersection.intersectionExists && intersection.t < closestIntersection.t) {
+        //             closestIntersection = intersection;
+        //             closestIntersection.tIndex = i;
+        //             closestIntersection.normal = vertices[triangles[i][0]].normal * intersection.w0 +
+        //                                     vertices[triangles[i][1]].normal * intersection.w1 +
+        //                                     vertices[triangles[i][2]].normal * intersection.w2;
+        //         }
+        //     }
+
+        //     return closestIntersection;
+        // }
 
 
 

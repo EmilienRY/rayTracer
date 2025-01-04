@@ -190,7 +190,7 @@ void ray_trace_from_camera() {
     }  
       
                
-          
+           
      
    
     std::cout << "\tDone" << std::endl;
@@ -222,12 +222,12 @@ void key (unsigned char keyPressed, int x, int y) {
             fullScreen = true;
         } 
         break;  
-    case 'q':  
+    case 'q':   
     case 27: 
-        clear ();    
+        clear ();     
         exit (0); 
         break;  
-    case 'w':
+    case 'w':  
         GLint polygonMode[2];
         glGetIntegerv(GL_POLYGON_MODE, polygonMode);
         if(polygonMode[0] != GL_FILL)
@@ -262,7 +262,7 @@ void mouse (int button, int state, int x, int y) {
         if (button == GLUT_LEFT_BUTTON) {
             camera.beginRotate (x, y);
             mouseMovePressed = false;
-            mouseRotatePressed = true;
+            mouseRotatePressed = true; 
             mouseZoomPressed = false;
         } else if (button == GLUT_RIGHT_BUTTON) {
             lastX = x;
@@ -272,54 +272,54 @@ void mouse (int button, int state, int x, int y) {
             mouseZoomPressed = false;
         } else if (button == GLUT_MIDDLE_BUTTON) {
             if (mouseZoomPressed == false) {
-                lastZoom = y;
+                lastZoom = y; 
                 mouseMovePressed = false;
                 mouseRotatePressed = false;
-                mouseZoomPressed = true;
+                mouseZoomPressed = true; 
             }
         }
-    } 
-   
+    }   
+    
     idle ();    
-}        
-   
+}           
+      
 void motion (int x, int y) {
-    if (mouseRotatePressed == true) {
+    if (mouseRotatePressed == true) { 
         camera.rotate (x, y);
-    }
+    }  
     else if (mouseMovePressed == true) {
         camera.move ((x-lastX)/static_cast<float>(SCREENWIDTH), (lastY-y)/static_cast<float>(SCREENHEIGHT), 0.0);
         lastX = x;
-        lastY = y;
+        lastY = y; 
     } 
     else if (mouseZoomPressed == true) {
         camera.zoom (float (y-lastZoom)/SCREENHEIGHT);
         lastZoom = y;
     } 
 }   
-    
-void reshape(int w, int h) {  
-    camera.resize (w, h);
+     
+void reshape(int w, int h) {   
+    camera.resize (w, h); 
 }  
    
 int main (int argc, char ** argv) {
     if (argc > 2) { 
         printUsage();
         exit (EXIT_FAILURE);    
-    }    
+    }     
     glutInit (&argc, argv);    
     glutInitDisplayMode (GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize (SCREENWIDTH, SCREENHEIGHT);
     window = glutCreateWindow ("gMini"); 
    
-   
+     
     init ();   
     glutIdleFunc (idle);   
     glutDisplayFunc (display); 
-    glutKeyboardFunc (key);
+    glutKeyboardFunc (key);  
     glutReshapeFunc (reshape);   
     glutMotionFunc (motion);  
-    glutMouseFunc (mouse);  
+    glutMouseFunc (mouse);   
     key ('?', 0, 0);  
         
         
@@ -331,7 +331,7 @@ int main (int argc, char ** argv) {
     scenes[2].setup_cornell_box();
    
     glutMainLoop ();
-    return EXIT_SUCCESS;  
+    return EXIT_SUCCESS;   
 }   
    
    

@@ -180,12 +180,13 @@ public:
         return v - 2*dot(v,n)*n;
     }
 
-    Vec3 refract(const Vec3& uv, const Vec3& n, double etai_over_etat) {
-        auto cos_theta = std::fmin(dot(-1*uv, n), 1.0);
-        Vec3 r_out_perp =  etai_over_etat * (uv + cos_theta*n);
-        Vec3 r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_perp.squareLength())) * n;
-        return r_out_perp + r_out_parallel;
+    Vec3 refract(const Vec3& v, const Vec3& n, float transparence) {
+
+        Vec3 refraction =transparence*v+(transparence*dot(v,n)-sqrt(1-(transparence*transparence)*(1-pow(dot(v,n),2))))*n;
+        return refraction;
+
     }
+
 
     Vec3 rayTraceRecursive(Ray ray, int NRemainingBounces) {
         Vec3 color=Vec3(0,0,0);
@@ -222,23 +223,24 @@ public:
             material = meshes[intersection.objectIndex].material;
         } 
 
-
+        Vec3 newColor;
         if(material.type == Material_Mirror) {
             Vec3 bias = normal * 0.001f;
             Vec3 reflectedDir = reflect(ray.direction(), normal);
             reflectedDir.normalize();
             
             Ray reflectedRay(pointIntersection + bias, reflectedDir);
-            Vec3 refractedColor = rayTraceRecursive(reflectedRay, NRemainingBounces - 1);
-            color += refractedColor;
+            newColor = rayTraceRecursive(reflectedRay, NRemainingBounces - 1);
+            color += newColor;
         }
         else if(material.type==Material_Glass){
-            float transparence=1.0008/material.transparency;
-            Vec3 refraction =transparence*ray.direction()+(transparence*dot(ray.direction(),normal)-sqrt(1-(transparence*transparence)*(1-pow(dot(ray.direction(),normal),2))))*normal;
-            Ray glassRay(pointIntersection,refraction);
-            Vec3 refractedColor;
-            refractedColor+= rayTraceRecursive(glassRay, NRemainingBounces-1);
-            color=refractedColor;
+
+            float indRefraction=1.0008/material.transparency;
+            Vec3 refraction =refract(ray.direction(),normal,indRefraction);
+            Ray refractedRay(pointIntersection,refraction);
+            newColor = rayTraceRecursive(refractedRay, NRemainingBounces-1);
+            color+=newColor;
+
         }
         else{   
 
@@ -581,6 +583,7 @@ public:
             s.scale(Vec3(2., 2., 1.));
             s.rotate_x(-90);
             s.build_arrays();
+
             s.material.diffuse_material = Vec3( 1.0,1.0,0.0 );
             s.material.specular_material = Vec3( 1.0,1.0,1.0 );
             s.material.shininess = 16;
@@ -661,7 +664,7 @@ public:
             m.scale(Vec3(0.5,0.5,0.5)); 
             m.translate(Vec3(-1., -1.5, 1)); 
             m.build_arrays();
-            //m.material.type=Material_Mirror;
+            // m.material.type=Material_Mirror;
             m.material.diffuse_material = Vec3( 1.,0.,0. );
             m.material.specular_material = Vec3( 1.,0.,0. );
             m.material.shininess = 16;
