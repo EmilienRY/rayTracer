@@ -53,8 +53,9 @@ static int lastX=0, lastY=0, lastZoom=0;
 static unsigned int FPS = 0;
 static bool fullScreen = false;
 
-std::vector<Scene> scenes;
-unsigned int selected_scene; 
+std::vector<Scene> scenes;  
+ 
+unsigned int selected_scene;  
 
 std::vector< std::pair< Vec3 , Vec3 > > rays;
 
@@ -79,15 +80,15 @@ void printUsage () {
 void usage () { 
     printUsage ();
     exit (EXIT_FAILURE);
-} 
-   
+}  
     
-// ------------------------------------
+      
+// ------------------------------------ 
 void initLight () {
     GLfloat light_position[4] = {0.0, 1.5, 0.0, 1.0};
     GLfloat color[4] = { 1.0, 1.0, 1.0, 1.0};
     GLfloat ambient[4] = { 1.0, 1.0, 1.0, 1.0};
-
+ 
     glLightfv (GL_LIGHT1, GL_POSITION, light_position);
     glLightfv (GL_LIGHT1, GL_DIFFUSE, color);
     glLightfv (GL_LIGHT1, GL_SPECULAR, color);
@@ -122,7 +123,7 @@ void clear () {
 // functions for alternative rendering.
 // ------------------------------------
 
- 
+  
 void draw () {
     glEnable(GL_LIGHTING);
     scenes[selected_scene].draw();
@@ -188,11 +189,11 @@ void ray_trace_from_camera() {
             image[x + y*w] /= nsamples;
         }
     }  
-      
-               
            
-     
-   
+               
+             
+        
+    
     std::cout << "\tDone" << std::endl;
 
     std::string filename = "./rendu.ppm";
@@ -207,24 +208,24 @@ void ray_trace_from_camera() {
     f << std::endl;
     f.close();
 }
-
  
-
+       
+  
 void key (unsigned char keyPressed, int x, int y) {
     Vec3 pos , dir;
-    switch (keyPressed) {
-    case 'f':
-        if (fullScreen == true) {
+    switch (keyPressed) {  
+    case 'f':  
+        if (fullScreen == true) { 
             glutReshapeWindow (SCREENWIDTH, SCREENHEIGHT);
             fullScreen = false; 
         } else { 
             glutFullScreen ();
-            fullScreen = true;
+            fullScreen = true; 
         } 
-        break;  
+        break;   
     case 'q':   
     case 27: 
-        clear ();     
+        clear ();        
         exit (0); 
         break;  
     case 'w':  

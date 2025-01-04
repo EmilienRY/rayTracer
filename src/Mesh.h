@@ -118,18 +118,23 @@ public:
     std::vector<Triangle> getAllTriangles() const {
         std::vector<Triangle> listeTriangles;
         listeTriangles.reserve(triangles.size());
+        float triangleScaling = 1.000001f;  // Facteur d'échelle
 
-        for (int i=0;i<triangles.size();i++) {
+        for (int i = 0; i < triangles.size(); i++) {
             Vec3 v0 = vertices[triangles[i][0]].position;
             Vec3 v1 = vertices[triangles[i][1]].position;
             Vec3 v2 = vertices[triangles[i][2]].position;
             
+            // Appliquer le scaling depuis le centre
+            Vec3 center = (v0 + v1 + v2) / 3.0f;
+            v0 = center + (v0 - center) * triangleScaling;
+            v1 = center + (v1 - center) * triangleScaling;
+            v2 = center + (v2 - center) * triangleScaling;
+            
             Triangle triangle(v0, v1, v2);
             triangle.setIndice(i);
-
             listeTriangles.push_back(triangle);
         }
-
         return listeTriangles;
     }
 
@@ -143,7 +148,6 @@ public:
         build_normals_array();
         build_UVs_array();
         build_triangles_array();
-        buildKDTree();  
     }
 
 

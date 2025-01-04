@@ -253,24 +253,24 @@ public:
             }
 
 
-            // Vec3 bias = normal * 0.001f;
-            // Ray shadowRay(pointIntersection, lightDir);
-            // float maxDistanceToLight = (lightPos - pointIntersection).length();
-            // RaySceneIntersection shadowIntersection = computeIntersection(shadowRay);
+            Vec3 bias = normal * 0.001f;
+            Ray shadowRay(pointIntersection, lightDir);
+            float maxDistanceToLight = (lightPos - pointIntersection).length();
+            RaySceneIntersection shadowIntersection = computeIntersection(shadowRay);
 
-            // if (shadowIntersection.intersectionExists) {
-            //     if ((shadowIntersection.typeOfIntersectedObject == 2 && 
-            //         shadowIntersection.raySphereIntersection.t > 0.01 && 
-            //         shadowIntersection.raySphereIntersection.t < maxDistanceToLight) ||
-            //         (shadowIntersection.typeOfIntersectedObject == 1 && 
-            //         shadowIntersection.raySquareIntersection.t > 0.01 && 
-            //         shadowIntersection.raySquareIntersection.t < maxDistanceToLight) ||
-            //         (shadowIntersection.typeOfIntersectedObject == 3 && 
-            //         shadowIntersection.rayMeshIntersection.t > 0.001 && 
-            //         shadowIntersection.rayMeshIntersection.t < maxDistanceToLight + 0.001)) {
-            //         return Vec3(0,0,0);
-            //     }
-            // }
+            if (shadowIntersection.intersectionExists) {
+                if ((shadowIntersection.typeOfIntersectedObject == 2 && 
+                    shadowIntersection.raySphereIntersection.t > 0.01 && 
+                    shadowIntersection.raySphereIntersection.t < maxDistanceToLight) ||
+                    (shadowIntersection.typeOfIntersectedObject == 1 && 
+                    shadowIntersection.raySquareIntersection.t > 0.01 && 
+                    shadowIntersection.raySquareIntersection.t < maxDistanceToLight) ||
+                    (shadowIntersection.typeOfIntersectedObject == 3 && 
+                    shadowIntersection.rayMeshIntersection.t > 0.001 && 
+                    shadowIntersection.rayMeshIntersection.t < maxDistanceToLight + 0.001)) {
+                    return Vec3(0,0,0);
+                }
+            }
 
 
             // Ambient
@@ -660,8 +660,10 @@ public:
         { //imported sphere
             meshes.resize( meshes.size() + 1 );
             Mesh & m = meshes[meshes.size() - 1];
-            m.loadOFF("./mesh/sphere.off");
-            m.scale(Vec3(0.5,0.5,0.5)); 
+            m.loadOFF("./mesh/dragon.off");
+            m.scale(Vec3(5.5,5.5,5.5)); 
+            // m.loadOFF("./mesh/sphere.off");
+            // m.scale(Vec3(0.8,0.8,0.8)); 
             m.translate(Vec3(-1., -1.5, 1)); 
             m.build_arrays();
             // m.material.type=Material_Mirror;
