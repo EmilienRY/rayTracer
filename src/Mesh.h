@@ -150,7 +150,6 @@ public:
         for( unsigned int v = 0 ; v < vertices.size() ; ++v ) {
             vertices[v].position += translation;
         }
-        buildKDTree();  
 
     }
 
@@ -158,7 +157,6 @@ public:
         for( unsigned int v = 0 ; v < vertices.size() ; ++v ) {
             vertices[v].position = transform*vertices[v].position;
         }
-        buildKDTree();  
 
         //        recomputeNormals();
         //        build_positions_array();
@@ -232,47 +230,47 @@ public:
     // Vous constaterez des problemes de précision
     // solution : ajouter un facteur d'échelle lors de la création du Triangle : float triangleScaling = 1.000001;
 
-        RayTriangleIntersection intersect(Ray const& ray) const {
-            RayTriangleIntersection hitInfo;
-            if (kdTree && kdTree->intersect(ray, hitInfo)) {
-                return hitInfo;
-            }
-            return RayTriangleIntersection(); 
-        }
-
-
         // RayTriangleIntersection intersect(Ray const& ray) const {
-        //     RayTriangleIntersection closestIntersection;
-        //     closestIntersection.t = FLT_MAX;
-        //     closestIntersection.intersectionExists = false;
-            
-        //     float triangleScaling = 1.000001f;
-
-        //     for (unsigned int i = 0; i < triangles.size(); i++) {
-        //         Vec3 v0 = vertices[triangles[i][0]].position;
-        //         Vec3 v1 = vertices[triangles[i][1]].position;
-        //         Vec3 v2 = vertices[triangles[i][2]].position;
-
-        //         Vec3 center = (v0 + v1 + v2) / 3.0f;
-        //         v0 = center + (v0 - center) * triangleScaling;
-        //         v1 = center + (v1 - center) * triangleScaling;
-        //         v2 = center + (v2 - center) * triangleScaling;
-
-        //         Triangle triangle(v0, v1, v2);
-
-        //         RayTriangleIntersection intersection = triangle.getIntersection(ray);
-                
-        //         if (intersection.intersectionExists && intersection.t < closestIntersection.t) {
-        //             closestIntersection = intersection;
-        //             closestIntersection.tIndex = i;
-        //             closestIntersection.normal = vertices[triangles[i][0]].normal * intersection.w0 +
-        //                                     vertices[triangles[i][1]].normal * intersection.w1 +
-        //                                     vertices[triangles[i][2]].normal * intersection.w2;
-        //         }
+        //     RayTriangleIntersection hitInfo;
+        //     if (kdTree && kdTree->intersect(ray, hitInfo)) {
+        //         return hitInfo;
         //     }
-
-        //     return closestIntersection;
+        //     return RayTriangleIntersection(); 
         // }
+
+
+        RayTriangleIntersection intersect(Ray const& ray) const {
+            RayTriangleIntersection closestIntersection;
+            closestIntersection.t = FLT_MAX;
+            closestIntersection.intersectionExists = false;
+            
+            float triangleScaling = 1.000001f;
+
+            for (unsigned int i = 0; i < triangles.size(); i++) {
+                Vec3 v0 = vertices[triangles[i][0]].position;
+                Vec3 v1 = vertices[triangles[i][1]].position;
+                Vec3 v2 = vertices[triangles[i][2]].position;
+
+                Vec3 center = (v0 + v1 + v2) / 3.0f;
+                v0 = center + (v0 - center) * triangleScaling;
+                v1 = center + (v1 - center) * triangleScaling;
+                v2 = center + (v2 - center) * triangleScaling;
+
+                Triangle triangle(v0, v1, v2);
+
+                RayTriangleIntersection intersection = triangle.getIntersection(ray);
+                
+                if (intersection.intersectionExists && intersection.t < closestIntersection.t) {
+                    closestIntersection = intersection;
+                    closestIntersection.tIndex = i;
+                    closestIntersection.normal = vertices[triangles[i][0]].normal * intersection.w0 +
+                                            vertices[triangles[i][1]].normal * intersection.w1 +
+                                            vertices[triangles[i][2]].normal * intersection.w2;
+                }
+            }
+
+            return closestIntersection;
+        }
 
 
 

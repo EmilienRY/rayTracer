@@ -20,7 +20,6 @@ void Mesh::loadOFF (const std::string & filename) {
         for (unsigned int j = 0; j < 3; j++)
             in >> triangles[i].v[j];
     }
-    buildKDTree();
     in.close ();
 }
 

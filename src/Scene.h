@@ -667,6 +667,8 @@ public:
             m.material.shininess = 16;
             m.material.transparency = 1.5;
             m.material.index_medium = 1.4;
+            m.buildKDTree();
+
 
         }
 

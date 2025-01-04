@@ -305,7 +305,7 @@ void reshape(int w, int h) {
 int main (int argc, char ** argv) {
     if (argc > 2) { 
         printUsage();
-        exit (EXIT_FAILURE);  
+        exit (EXIT_FAILURE);    
     }    
     glutInit (&argc, argv);    
     glutInitDisplayMode (GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
