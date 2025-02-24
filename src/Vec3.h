@@ -103,9 +103,6 @@ public:
     }
 
 
-
-
-
 };
 
 static inline bool operator != (Vec3 const & a , Vec3 const & b) {

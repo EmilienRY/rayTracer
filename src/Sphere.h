@@ -14,28 +14,18 @@ struct RaySphereIntersection{
     Vec3 normal;
 };
 
-static
-Vec3 SphericalCoordinatesToEuclidean( Vec3 ThetaPhiR ) {
-    return ThetaPhiR[2] * Vec3( cos(ThetaPhiR[0]) * cos(ThetaPhiR[1]) , sin(ThetaPhiR[0]) * cos(ThetaPhiR[1]) , sin(ThetaPhiR[1]) );
-}
+
 static
 Vec3 SphericalCoordinatesToEuclidean( float theta , float phi ) {
     return Vec3( cos(theta) * cos(phi) , sin(theta) * cos(phi) , sin(phi) );
 }
 
-static
-Vec3 EuclideanCoordinatesToSpherical( Vec3 xyz ) {
-    float R = xyz.length();
-    float phi = asin( xyz[2] / R );
-    float theta = atan2( xyz[1] , xyz[0] );
-    return Vec3( theta , phi , R );
-}
 
 float dot(Vec3 a,Vec3 b){
     return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 }
 
-
+ 
 class Sphere : public Mesh {
 public:
     Vec3 m_center;

@@ -118,18 +118,16 @@ public:
     std::vector<Triangle> getAllTriangles() const {
         std::vector<Triangle> listeTriangles;
         listeTriangles.reserve(triangles.size());
-        float triangleScaling = 1.000001f;  // Facteur d'échelle
+        float triangleScaling = 1.000001f;  
 
-        for (int i = 0; i < triangles.size(); i++) {
+        for (int i = 0; i < (int)triangles.size(); i++) {
             Vec3 v0 = vertices[triangles[i][0]].position;
             Vec3 v1 = vertices[triangles[i][1]].position;
             Vec3 v2 = vertices[triangles[i][2]].position;
             
-            // Appliquer le scaling depuis le centre
-            Vec3 center = (v0 + v1 + v2) / 3.0f;
-            v0 = center + (v0 - center) * triangleScaling;
-            v1 = center + (v1 - center) * triangleScaling;
-            v2 = center + (v2 - center) * triangleScaling;
+            v0 = v0 * triangleScaling;
+            v1 = v1 * triangleScaling;
+            v2 = v2 * triangleScaling;
             
             Triangle triangle(v0, v1, v2);
             triangle.setIndice(i);
@@ -171,7 +169,7 @@ public:
         apply_transformation_matrix( scale_matrix );
     }
 
-    void rotate_x ( float angle ){
+    void rotate_x ( float angle ){ 
         float x_angle = angle * M_PI / 180.;
         Mat3 x_rotation(1., 0., 0.,
                         0., cos(x_angle), -sin(x_angle),
@@ -226,10 +224,7 @@ public:
 
     }
 
-    // Note :
-    // Creer un objet Triangle pour chaque face
-    // Vous constaterez des problemes de précision
-    // solution : ajouter un facteur d'échelle lors de la création du Triangle : float triangleScaling = 1.000001;
+        // intersect kd tree
 
         RayTriangleIntersection intersect(Ray const& ray) const {
             RayTriangleIntersection hitInfo;
@@ -250,6 +245,8 @@ public:
         }
 
 
+        // vieu interstc
+
         // RayTriangleIntersection intersect(Ray const& ray) const {
         //     RayTriangleIntersection closestIntersection;
         //     closestIntersection.t = FLT_MAX;
@@ -262,10 +259,9 @@ public:
         //         Vec3 v1 = vertices[triangles[i][1]].position;
         //         Vec3 v2 = vertices[triangles[i][2]].position;
 
-        //         Vec3 center = (v0 + v1 + v2) / 3.0f;
-        //         v0 = center + (v0 - center) * triangleScaling;
-        //         v1 = center + (v1 - center) * triangleScaling;
-        //         v2 = center + (v2 - center) * triangleScaling;
+        //         v0 = v0 * triangleScaling;
+        //         v1 = v1 * triangleScaling;
+        //         v2 = v2 * triangleScaling;
 
         //         Triangle triangle(v0, v1, v2);
 
@@ -282,15 +278,6 @@ public:
 
         //     return closestIntersection;
         // }
-
-
-
-
-    // RayTriangleIntersection intersect(Ray const& ray) const {
-    //     return kdTree->findIntersection(ray);
-    // }
-
-
 };
 
 

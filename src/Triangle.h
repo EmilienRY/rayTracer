@@ -31,7 +31,7 @@ public:
         return m_c[indice];
     }
 
-    Vec3 centroid() const {
+    Vec3 centre() const {
         return (m_c[0] + m_c[1] + m_c[2]) / 3.0f;
     }
 

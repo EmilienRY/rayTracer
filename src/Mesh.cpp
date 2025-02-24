@@ -52,3 +52,4 @@ void Mesh::centerAndScaleToUnit () {
     for  (unsigned int i = 0; i < vertices.size (); i++)
         vertices[i].position = (vertices[i].position - c) / maxD;
 }
+ 

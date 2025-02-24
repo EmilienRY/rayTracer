@@ -4,7 +4,6 @@
 #include "imageLoader.h"
 #include "Vec3.h"
 #include <cmath>
-
 #include <GL/glut.h>
 
 enum MaterialType {
@@ -24,6 +23,7 @@ struct Material {
     float transparency;
 
     MaterialType type;
+    bool hasTexture;
 
     Material() {
         type = Material_Diffuse_Blinn_Phong;

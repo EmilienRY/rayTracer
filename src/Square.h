@@ -60,6 +60,7 @@ public:
 
     }
 
+
     RaySquareIntersection intersect(const Ray& ray) const {
         RaySquareIntersection intersection;
         intersection.intersectionExists = false;

@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <limits>
 
-// Boîte englobante
 struct AABB {
     Vec3 min;
     Vec3 max;
@@ -24,11 +23,11 @@ struct AABB {
 
 
     bool intersect(const Ray& ray) const {
-        const float EPSILON = 1e-7f;
+
         Vec3 invDir = Vec3(
-            (std::abs(ray.direction()[0]) > EPSILON) ? 1.0f / ray.direction()[0] : std::numeric_limits<float>::infinity(),
-            (std::abs(ray.direction()[1]) > EPSILON) ? 1.0f / ray.direction()[1] : std::numeric_limits<float>::infinity(),
-            (std::abs(ray.direction()[2]) > EPSILON) ? 1.0f / ray.direction()[2] : std::numeric_limits<float>::infinity()
+            (std::abs(ray.direction()[0]) > 0) ? 1.0f / ray.direction()[0] : std::numeric_limits<float>::infinity(),
+            (std::abs(ray.direction()[1]) > 0) ? 1.0f / ray.direction()[1] : std::numeric_limits<float>::infinity(),
+            (std::abs(ray.direction()[2]) > 0) ? 1.0f / ray.direction()[2] : std::numeric_limits<float>::infinity()
         );
 
         Vec3 origin = ray.origin();
@@ -45,20 +44,19 @@ struct AABB {
             tmax = std::min(tmax, t2);
         }
 
-        return tmax > std::max(0.0f, tmin - EPSILON);
+        return tmax > std::max(0.0f, tmin);
     }
 
 };
 
-// Nœud du k-d tree
 struct KDNode {
-    AABB bbox;        // Boîte englobante
-    int splitAxis;    // Axe de division (0=x, 1=y, 2=z)
-    float splitPos;   // Position du plan de division
-    KDNode* left;     // Enfant gauche
-    KDNode* right;    // Enfant droit
-    std::vector<Triangle> triangles; // Triangles si feuille
-    bool isLeaf;      // Est-ce une feuille ?
+    AABB boiteEnglo;        
+    int splitAxis;    
+    float splitPos;  
+    KDNode* left;     
+    KDNode* right;    
+    std::vector<Triangle> triangles; 
+    bool isLeaf;      
 
     KDNode() : left(nullptr), right(nullptr), isLeaf(false) {}
 };
@@ -67,73 +65,66 @@ class KDTree {
 public:
     KDTree(const std::vector<Triangle>& triangles) {
         std::vector<Triangle> tris = triangles;
-        root = build(tris, 0);
+        racine = build(tris, 0);
     }
 
     bool intersect(const Ray& ray, RayTriangleIntersection& hitInfo) const {
-        return intersectNode(root, ray, hitInfo);
+        return intersectNode(racine, ray, hitInfo);
     }
 
 private:
-    KDNode* root;
-    static const int SAH_THRESHOLD = 128;
+    KDNode* racine;
 
 
     KDNode* build(std::vector<Triangle>& triangles, int depth) {
         KDNode* node = new KDNode();
-        node->bbox = calculateAABB(triangles);
+        node->boiteEnglo = calculateAABB(triangles);
 
-        const int MAX_TRIANGLES = 8;
-        const int MAX_DEPTH = 25;
+        const int minTriangles = 8;
+        const int maxProf = 25;
 
-        // Critère d'arrêt
-        if (triangles.size() <= MAX_TRIANGLES || depth > MAX_DEPTH) {
+        if (triangles.size() <= minTriangles || depth > maxProf) {
             node->isLeaf = true;
             node->triangles = triangles;
             return node;
         }
 
-        // Axe avec la plus grande étendue
-        Vec3 extent = node->bbox.size();
-        int axis = (extent[1] > extent[0]) ? 1 : 0;
-        axis = (extent[2] > extent[axis]) ? 2 : axis;
+        Vec3 sizeBoite = node->boiteEnglo.size();
+        int axis = (sizeBoite[1] > sizeBoite[0]) ? 1 : 0;
+        axis = (sizeBoite[2] > sizeBoite[axis]) ? 2 : axis;
 
-        // Trouver une position de split
-        std::vector<float> centroids;
-        for (const auto& tri : triangles) {
-            centroids.push_back(tri.centroid()[axis]);
+        std::vector<float> listeCentreTriangles;
+        for (Triangle & tri : triangles) {
+            listeCentreTriangles.push_back(tri.centre()[axis]);
         }
-        std::nth_element(centroids.begin(), centroids.begin() + centroids.size() / 2, centroids.end());
+        std::nth_element(listeCentreTriangles.begin(), listeCentreTriangles.begin() + listeCentreTriangles.size() / 2, listeCentreTriangles.end());
 
 
-        float splitPos = centroids[centroids.size() / 2];
+        float splitPos = listeCentreTriangles[listeCentreTriangles.size() / 2];
 
 
-        // Éviter un mauvais split
-        if (splitPos <= node->bbox.min[axis] || splitPos >= node->bbox.max[axis]) {
+        if (splitPos <= node->boiteEnglo.min[axis] || splitPos >= node->boiteEnglo.max[axis]) {
             node->isLeaf = true;
             node->triangles = triangles;
             return node;
         }
+
 
         std::vector<Triangle> leftTriangles, rightTriangles;
         for ( auto& tri : triangles) {
             float minCoord = std::min({tri.getM_c(0)[axis], tri.getM_c(1)[axis], tri.getM_c(2)[axis]});
             float maxCoord = std::max({tri.getM_c(0)[axis], tri.getM_c(1)[axis], tri.getM_c(2)[axis]});
 
-            float OVERLAP_EPSILON = 1e-5f;
-            if (maxCoord <= splitPos + OVERLAP_EPSILON) {
+            if (maxCoord <= splitPos ) {
                 leftTriangles.push_back(tri);
-            } else if (minCoord >= splitPos - OVERLAP_EPSILON) {
+            } else if (minCoord >= splitPos) {
                 rightTriangles.push_back(tri);
             } else {
-                // Triangle traversant le plan
                 leftTriangles.push_back(tri);
                 rightTriangles.push_back(tri);
             }
         }
 
-        // Éviter une récursion infinie
         if (leftTriangles.empty() || rightTriangles.empty() || 
             leftTriangles.size() == triangles.size() || 
             rightTriangles.size() == triangles.size()) {
@@ -153,55 +144,52 @@ private:
 
 
 
-
-
-
     bool intersectNode(KDNode* node, const Ray& ray, RayTriangleIntersection& hitInfo) const {
-        if (!node->bbox.intersect(ray)) return false;
+        if (!node->boiteEnglo.intersect(ray)) return false;
         
         if (node->isLeaf) {
             bool hit = false;
             float closest_t = hitInfo.intersectionExists ? hitInfo.t : FLT_MAX;
-            const float INTERSECTION_EPSILON = 1e-6f;
             
-            for (const auto& tri : node->triangles) {
+            for (const Triangle & tri : node->triangles) {
                 RayTriangleIntersection tempHit = tri.getIntersection(ray);
-                // Ajouter une marge de sécurité pour la comparaison
-                if (tempHit.intersectionExists && tempHit.t < closest_t - INTERSECTION_EPSILON) {
-                    // Vérifier que l'intersection est valide
-                    if (tempHit.t > INTERSECTION_EPSILON) {
-                        closest_t = tempHit.t;
-                        hitInfo = tempHit;
-                        hit = true;
-                    }
+                if (tempHit.intersectionExists && tempHit.t < closest_t) {
+              
+                    closest_t = tempHit.t;
+                    hitInfo = tempHit;
+                    hit = true;
+                    
                 }
             }
             return hit;
         }
 
+        float originComponent = ray.origin()[node->splitAxis];
         float dirComponent = ray.direction()[node->splitAxis];
-        const float DIR_EPSILON = 1e-10f;
-        
-        if (std::abs(dirComponent) < DIR_EPSILON) {
-            // Rayon parallèle au plan de séparation
-            if (ray.origin()[node->splitAxis] <= node->splitPos) {
-                return intersectNode(node->left, ray, hitInfo);
-            } else {
-                return intersectNode(node->right, ray, hitInfo);
-            }
+
+        KDNode* first;
+        KDNode* second;
+
+        if (dirComponent > 0) {
+            first = (originComponent <= node->splitPos) ? node->left : node->right;
+            second = (originComponent <= node->splitPos) ? node->right : node->left;
+        } else if (dirComponent < 0) {
+            first = (originComponent >= node->splitPos) ? node->right : node->left;
+            second = (originComponent >= node->splitPos) ? node->left : node->right;
+        }
+        else{
+            first = node->left;
+            second = node->right;    
         }
 
-        KDNode *first = (ray.origin()[node->splitAxis] <= node->splitPos) ? node->left : node->right;
-        KDNode *second = (ray.origin()[node->splitAxis] <= node->splitPos) ? node->right : node->left;
-        
-        float splitDist = (node->splitPos - ray.origin()[node->splitAxis]) / dirComponent;
         bool hit = intersectNode(first, ray, hitInfo);
+
+        float splitDist = (node->splitPos - originComponent) / dirComponent;
         
-        // Ajouter une marge de tolérance pour la traversée du second nœud
-        if (!hit || (splitDist > -DIR_EPSILON && (!hitInfo.intersectionExists || splitDist < hitInfo.t + DIR_EPSILON))) {
+        if (splitDist >= 0 && (!hit || splitDist < hitInfo.t)) {
             hit |= intersectNode(second, ray, hitInfo);
         }
-        
+
         return hit;
     }
 
